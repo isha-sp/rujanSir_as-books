@@ -11,6 +11,17 @@ const bookSchema = new mongoose.Schema({
     },
     reviews:{
         type: Object
+    },
+    address:{
+        location:{
+            type: String
+        },
+        pincode:{
+            type: String
+        },
+        state:{
+            type: String
+        }
     }
 },{timestamps:true});
 

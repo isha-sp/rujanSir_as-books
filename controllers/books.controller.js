@@ -28,7 +28,7 @@ exports.getBooks = async(req,res)=>{
             queryObject["author"]= author
         }
         if(bookid){
-            queryObject["id"]= bookid
+            queryObject["_id"]= bookid
         }
         console.log(queryObject)
 
@@ -43,12 +43,28 @@ exports.getBooks = async(req,res)=>{
 
 exports.updateBook = async(req,res)=>{
     try{
-        const id = req.params.bookid
-        const title = req.body.title
+        const id = req.params.bookid;
+        const title = req.body.title;
+        const author = req.body.author;
+        const reviews = req.body.reviews;
 
+        const updateFields= {};
+
+        // const oldBook = await BookModel.findOne({_id: id});
+        // const oldReviews = oldBook.reviews;
+
+        // const updatedReviews = {...oldReviews, ...reviews};
+        // console.log(update)
+
+        for(let key in reviews){
+            updateFields["reviews."+key.toString()] = reviews[key];
+        }
+        // console.log({...updateFields});
         const book = await BookModel.findOneAndUpdate({_id:id}, {
             $set: {
-                title
+                "title": title,
+                author,
+                ...updateFields
             }
         }, {new:true})
 
@@ -74,3 +90,19 @@ exports.deleteBook = async(req,res)=>{
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+exports.getBookReviews = async(req,res)=>{
+    try{
+        const id = req.params.bookid;
+
+        const book = await BookModel.findById(id).select("reviews");
+
+        if(!book){
+            return res.status(404).json({message: "Book not found"});
+        }
+        res.status(200).json({message: "Reviews fetched successfully", data: book});
+    }catch(error){
+        console.log(error);
+        res.status(500).json({message: "internal server error"});
+    }
+};
